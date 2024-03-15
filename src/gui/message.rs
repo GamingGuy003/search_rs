@@ -1,4 +1,9 @@
-#[derive(Debug, Clone, Copy)]
+use iced::{theme::Scrollable, widget::scrollable};
+
+#[derive(Debug, Clone)]
 pub enum Message {
-    KeyPressed(char),
+    //Scroll(scrollable::State),
+    Search,
+    SearchCompleted(Result<Vec<Vec<String>>, String>),
+    SearchTermChange(String),
 }

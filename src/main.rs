@@ -1,18 +1,36 @@
-use std::{fs::OpenOptions, path::Path};
-
 use gui::window::SearchWindow;
 use iced::{Application, Settings};
-use search::index;
 
 mod gui;
 mod search;
 
+const OUTPUT_PATH: &str = "scan.txt";
+
 fn main() -> iced::Result {
-    let mut output = OpenOptions::new()
+    pretty_env_logger::init();
+    /*
+    let path = std::path::Path::new(OUTPUT_PATH);
+    if path.exists() {
+        std::fs::remove_file(path).unwrap();
+    }
+
+    let mut output = std::fs::OpenOptions::new()
         .append(true)
         .create(true)
-        .open("scan.txt")
+        .open(path)
         .unwrap();
-    index::index_folder(Path::new("F:\\SteamLibrary").into(), &mut output).unwrap();
+
+    let start = std::time::Instant::now();
+    search::index::index_folder(
+        std::path::Path::new(&std::env::args().collect::<Vec<String>>()[1]).into(),
+        &mut output,
+        String::new(),
+    )
+    .unwrap();
+    println!(
+        "Indexed in: {:?}",
+        std::time::Instant::now().duration_since(start)
+    );
+    */
     SearchWindow::run(Settings::default())
 }
