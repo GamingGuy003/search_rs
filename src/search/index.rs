@@ -1,4 +1,4 @@
-use async_recursion::async_recursion;
+//use async_recursion::async_recursion;
 use log::{debug, warn};
 use std::{
     fs::{read_dir, File},
@@ -7,11 +7,7 @@ use std::{
 };
 
 //#[async_recursion]
-pub fn index_folder(
-    root: PathBuf,
-    logfile: &mut File,
-    padding: String,
-) -> std::io::Result<()> {
+pub fn index_folder(root: PathBuf, logfile: &mut File, padding: String) -> std::io::Result<()> {
     let entries = match read_dir(&root) {
         Ok(entries) => entries,
         Err(err) => match err.kind() {

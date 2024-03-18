@@ -2,19 +2,19 @@ use std::path::Path;
 
 use iced::{
     futures::{executor, TryFutureExt},
-    widget::{scrollable, Column, Row, Scrollable, Text, TextInput},
-    Alignment::Center,
+    widget::{scrollable::Viewport, Column, Row, Scrollable, Text, TextInput},
+    Alignment::Start,
     Application, Command, Element, Theme,
 };
 
-use crate::{search, OUTPUT_PATH};
+use crate::search;
 
 use super::message::Message;
 
 pub struct SearchWindow {
     pub term_entered: String,
     pub results: Vec<String>,
-    pub scrollable: scrollable::State,
+    pub scrollable: Option<Viewport>,
 }
 
 impl Application for SearchWindow {
@@ -30,23 +30,42 @@ impl Application for SearchWindow {
                 .on_submit(Message::Search),
         );
 
+        let mut results = Column::new();
+        for result in &self.results {
+            results = results.push(Text::new(result));
+        }
+        let scrollable = Scrollable::new(results).on_scroll(Message::Scroll);
+
         Column::new()
-            .align_items(Center)
+            .align_items(Start)
             .push(searchrow)
-            .push(Scrollable::new(Text::new(self.results.join("\n"))))
+            .push(scrollable)
             .into()
     }
 
     fn update(&mut self, message: Message) -> Command<Message> {
         match message {
-            Message::SearchTermChange(search) => self.term_entered = search,
+            Message::SearchTermChange(search) => {
+                self.term_entered = search;
+                return Command::perform(
+                    search::find::find(
+                        Path::new(crate::OUTPUT_PATH).into(),
+                        self.term_entered.clone(),
+                    )
+                    .map_err(|err| err.to_string()),
+                    Message::SearchCompleted,
+                );
+            }
             Message::Search => {
                 if self.term_entered.is_empty() {
                     return Command::none();
                 }
                 return Command::perform(
-                    search::find::find(Path::new(OUTPUT_PATH).into(), self.term_entered.clone())
-                        .map_err(|err| err.to_string()),
+                    search::find::find(
+                        Path::new(crate::OUTPUT_PATH).into(),
+                        self.term_entered.clone(),
+                    )
+                    .map_err(|err| err.to_string()),
                     Message::SearchCompleted,
                 );
             }
@@ -56,7 +75,7 @@ impl Application for SearchWindow {
                 }
                 Err(err) => self.results = vec![err],
             },
-            //Message::Scroll() => todo!(),
+            Message::Scroll(viewport) => self.scrollable = Some(viewport),
         }
         Command::none()
     }
@@ -66,7 +85,7 @@ impl Application for SearchWindow {
             Self {
                 term_entered: String::new(),
                 results: Vec::new(),
-                scrollable: scrollable::State::new(),
+                scrollable: None,
             },
             Command::none(),
         )

@@ -1,8 +1,8 @@
-use iced::{theme::Scrollable, widget::scrollable};
+use iced::widget::scrollable::Viewport;
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    //Scroll(scrollable::State),
+    Scroll(Viewport),
     Search,
     SearchCompleted(Result<Vec<Vec<String>>, String>),
     SearchTermChange(String),
